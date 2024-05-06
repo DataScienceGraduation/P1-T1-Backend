@@ -12,7 +12,6 @@ RUN \
  apk add --allow-untrusted msodbcsql17_17.10.5.1-1_amd64.apk && \
  apk add --allow-untrusted mssql-tools_17.10.1.1-1_amd64.apk && \
  pip install -r requirements.txt --no-cache-dir && \
- apk --purge del .build-deps
 
 COPY . /app
 WORKDIR /app

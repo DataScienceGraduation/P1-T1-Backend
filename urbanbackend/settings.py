@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 
 from pathlib import Path
 from decouple import config
+import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -26,7 +27,7 @@ SECRET_KEY = 'django-insecure-@si5y!xfsq7==h!%-ad#qh_r4ba779g^-rvw9s#w*rhqs1qp^s
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['petrinet.azurewebsites.net', '0.0.0.0']
+ALLOWED_HOSTS = ['petrinet.azurewebsites.net', '0.0.0.0', '127.0.0.1']
 
 
 # Application definition
@@ -77,12 +78,12 @@ WSGI_APPLICATION = 'urbanbackend.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql',
+        'ENGINE': 'mssql',
         'NAME': config('DATABASE_DBNAME'),
         'USER': config('DATABASE_USER'),
         'PASSWORD': config('DATABASE_PASSWORD'),
         'HOST': config('DATABASE_HOST'),
-        'PORT': config('DATABASE_PORT'),
+        'PORT': config('DATABASE_PORT')
     }
 }
 

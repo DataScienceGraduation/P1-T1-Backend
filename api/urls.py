@@ -1,10 +1,10 @@
 from django.urls import path
-from . import views
+from . import auth_views
 
 urlpatterns = [
-    path('signup/', views.signup, name='api-signup'),
-    path('signin/', views.signin, name='api-login'),
-    path('logout/', views.logout, name='api-logout'),
-    path('isAuth/', views.isAuth, name='api-is-auth'),
-    path('whoami/', views.whoami, name='api-whoami'),
+    path('signup/', auth_views.signup, name='api-signup'),
+    path('signin/', auth_views.signin, name='api-login'),
+    path('logout/', auth_views.logout, name='api-logout'),
+    path('isAuth/', auth_views.isAuth, name='api-is-auth'),
+    path('whoami/', auth_views.whoami, name='api-whoami')
 ]

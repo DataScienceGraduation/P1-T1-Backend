@@ -4,7 +4,6 @@ from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth import authenticate, login, logout
 from urbanbackend.models import CustomerUser
 from rest_framework.authtoken.models import Token
-from rest_framework.permissions import IsAuthenticated
 
 
 @csrf_exempt
@@ -66,7 +65,7 @@ def logout(request):
 def isAuth(request):
     request_data = request.POST
     token = request_data.get('token')
-    if Token.objects.filter(auth_token=token).exists():
+    if Token.objects.filter(key=token).exists():
         return JsonResponse({'message': 'User is authenticated'}, status=200)
     return JsonResponse({'message': 'User is not authenticated'}, status=200)
 
@@ -74,4 +73,9 @@ def isAuth(request):
 @csrf_exempt
 @require_POST
 def whoami(request):
-    return JsonResponse({'message': 'User is authenticated'}, status=200)
+    request_data = request.POST
+    token = request_data.get('token')
+    if not Token.objects.filter(key=token).exists():
+        return JsonResponse({'message': 'User is not authenticated'}, status=200)
+    user = Token.objects.get(key=token).user
+    return JsonResponse({'username': user.username, 'email': user.email, 'phone': user.phone, 'apartment': user.apartmentNo, 'street': user.address, 'governorate': user.governorate, 'zipcode': user.zipcode}, status=200)

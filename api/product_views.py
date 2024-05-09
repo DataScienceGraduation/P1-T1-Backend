@@ -13,17 +13,19 @@ def getFeaturedProducts(request):
     feature_product_list = Product.objects.filter(is_featured=True)
     return JsonResponse({'products': list(feature_product_list.values())}, status=200)
 
+
 @csrf_exempt
 @require_POST
-def getAllProducts(request):
+def getProducts(request):
     request_data = request.POST
     category = request_data.get('category')
-    if category is None or category == 'all':
+    if category is None:
         product_list = Product.objects.all()
         return JsonResponse({'products': list(product_list.values())}, status=200)
 
     filtered_products = Product.objects.filter(category=category.name)
     return JsonResponse({'products': list(filtered_products.values())}, status=200)
+
 
 @csrf_exempt
 @require_GET
@@ -34,8 +36,10 @@ def getProduct(request):
     product_detail = {'product': product}
     return JsonResponse(product_detail, status=200)
 
+
 @csrf_exempt
 @require_GET
 def getCategories(request):
     Category_list = Category.objects.all()
     return JsonResponse({'Categories': list(Category_list.values())}, status=200)
+

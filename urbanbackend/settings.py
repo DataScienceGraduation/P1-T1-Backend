@@ -43,9 +43,11 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework.authtoken',
     'urbanbackend',
+    'corsheaders',
 ]
 
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -56,6 +58,12 @@ MIDDLEWARE = [
 ]
 
 ROOT_URLCONF = 'urbanbackend.urls'
+
+CORS_ALLOWED_ORIGINS = [
+    "https://petrinet.azurewebsites.net",
+    "https://p1-t1-frontend.vercel.app/",
+    "http://localhost:3000",
+]
 
 TEMPLATES = [
     {

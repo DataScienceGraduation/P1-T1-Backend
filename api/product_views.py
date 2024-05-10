@@ -4,6 +4,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth import authenticate, login, logout
 from urbanbackend.models import CustomerUser
 from rest_framework.authtoken.models import Token
+from fuzzywuzzy import process
 from urbanbackend.models import Product, Category
 
 
@@ -42,4 +43,19 @@ def getProduct(request):
 def getCategories(request):
     Category_list = Category.objects.all()
     return JsonResponse({'Categories': list(Category_list.values())}, status=200)
+
+
+@csrf_exempt
+@require_GET
+def Search(request):
+    query = request.GET.get('q')
+    typoitem = process.extract(query, Product.objects.values_list('name', flat=True), limit=4)
+    items = []
+    for item in typoitem:
+        print(item[0])
+        items.append(list(Product.objects.filter(name__icontains=item[0]).values()))
+    if not items:
+        return JsonResponse({'message': 'product not found'}, status=200)
+    return JsonResponse({'Products': items}, status=200)
+
 

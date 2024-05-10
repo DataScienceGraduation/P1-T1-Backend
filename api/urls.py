@@ -14,9 +14,10 @@ urlpatterns = [
     path('addToCart/', order_views.addToCart, name='api-add-to-cart'),
     path('getOrders/', order_views.getOrders, name='api-get-orders'),
     path('getOrder/', order_views.getOrder, name='api-get-order'),
-    path('addImageToProduct/', order_views.addImageToProduct, name='api-add-image-to-product')
+    path('addImageToProduct/', order_views.addImageToProduct, name='api-add-image-to-product'),
     path('getFeaturedProducts/', product_views.getFeaturedProducts, name='api-get-featured-products'),
     path('getProducts/', product_views.getProducts, name='api-get-products'),
     path('getProduct/', product_views.getProduct, name='api-get-product'),
     path('getCategories/', product_views.getCategories, name='api-get-categories'),
+    path('search/', product_views.Search, name='api-search')
 ]

@@ -54,8 +54,8 @@ def logout(request):
     request_data = request.POST
     token = request_data.get('token')
     if token:
-        request.user.auth_token.delete()
-        logout(request)
+        user = Token.user
+        Token.objects.filter(user=user).delete()
         return JsonResponse({'message': 'User logged out'}, status=200)
     return JsonResponse({'message': 'Invalid Request'}, status=200)
 

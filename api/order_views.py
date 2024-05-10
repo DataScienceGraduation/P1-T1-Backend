@@ -1,8 +1,8 @@
 from django.http import JsonResponse
-from django.views.decorators.http import require_POST
+from django.views.decorators.http import require_POST, require_GET
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth import authenticate, login, logout
-from urbanbackend.models import CustomerUser, Order
+from urbanbackend.models import CustomerUser, Order, Cart, OrderItem, Product
 from rest_framework.authtoken.models import Token
 
 
@@ -25,6 +25,59 @@ def getOrders(request):
         dict_orders.append({'orderid': order.id, 'orderstatus': order.status, 'ordertotal': order.total,
                             'orderitems': order_items})
     return JsonResponse({'message': 'Orders retrieved', 'orders': dict_orders}, status=200)
+
+
+@csrf_exempt
+@require_GET
+def getCart(request):
+    request_data = request.POST
+    token = request_data.get('token')
+    if not token:
+        return JsonResponse({'message': 'Invalid Request'}, status=400)
+    token = Token.objects.get(key=token).user
+    if not token:
+        return JsonResponse({'message': 'Invalid Request'}, status=400)
+    cart = Cart.objects.get(user=token)
+    cart_items = []
+    for item in cart.items.all():
+        cart_items.append({'product_id': item.product.id, 'quantity': item.quantity})
+    return JsonResponse({'message': 'Cart retrieved', 'cart': {'cartid': cart.id, 'cartitems': cart_items}, 'total': cart.total}, status=200)
+
+
+@csrf_exempt
+@require_POST
+def deleteCart(request):
+    request_data = request.POST
+    token = request_data.get('token')
+    if not token:
+        return JsonResponse({'message': 'Invalid Request'}, status=400)
+    token = Token.objects.get(key=token).user
+    if not token:
+        return JsonResponse({'message': 'Invalid Request'}, status=400)
+    cart = Cart.objects.get(user=token)
+    cart.delete()
+    return JsonResponse({'message': 'Cart deleted'}, status=200)
+
+
+@csrf_exempt
+@require_POST
+def addToCart(request):
+    request_data = request.POST
+    token = request_data.get('token')
+    product_id = request_data.get('product_id')
+    quantity = request_data.get('quantity')
+    if not token or not product_id or not quantity:
+        return JsonResponse({'message': 'Invalid Request'}, status=400)
+    token = Token.objects.get(key=token).user
+    product = Product.objects.get(id=product_id)
+    if not token or not product:
+        return JsonResponse({'message': 'Invalid Request'}, status=400)
+    orderItem = OrderItem.objects.create(product=product, quantity=quantity, total=int(quantity) * product.price)
+    cart = Cart.objects.get(user=token)
+    if not cart:
+        cart = Cart.objects.create(user=token)
+    cart.items.add(orderItem)
+    return JsonResponse({'message': 'Item added to cart'}, status=200)
 
 
 @csrf_exempt
@@ -66,7 +119,6 @@ def addImageToProduct(request):
 @csrf_exempt
 @require_POST
 def createOrder(request):
-    from urbanbackend.models import OrderItem, Product
     request_data = request.POST
     token = request_data.get('token')
     if not token:
@@ -74,15 +126,11 @@ def createOrder(request):
     token = Token.objects.get(key=token).user
     if not token:
         return JsonResponse({'message': 'Invalid Request'}, status=400)
-    items = request_data.get('items')
-    total = request_data.get('total')
-    status = request_data.get('status')
-    order = Order.objects.create(user=token, total=total, status=status)
-    # convert items to list of dictionaries
-    items = eval(items or '[]')
-    for item in items:
-        product = Product.objects.get(id=item['product_id'])
-        order_item = OrderItem.objects.create(product=product, quantity=item['quantity'],
-                                              total=int(item['quantity']) * product.price)
-        order.items.add(order_item)
-    return JsonResponse({'message': 'Order created'}, status=201)
+    cart = Cart.objects.get(user=token)
+    if not cart:
+        return JsonResponse({'message': 'Invalid Request'}, status=400)
+    order = Order.objects.create(user=token, total=cart.total, status='Pending')
+    for item in cart.items.all():
+        order.items.add(item)
+    cart.delete()
+    return JsonResponse({'message': 'Order created'}, status=200)

@@ -1,5 +1,6 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
+from .custom_storage import AzureBlobStorage
 
 
 class CustomerUser(AbstractUser):
@@ -23,7 +24,7 @@ class Product(models.Model):
     name = models.CharField(max_length=255)
     price = models.FloatField()
     description = models.TextField()
-    image = models.ImageField(upload_to='products/')
+    image = models.ImageField(upload_to='products/', storage=AzureBlobStorage())
     category = models.ForeignKey(Category, on_delete=models.CASCADE)
     is_featured = models.BooleanField(default=False)
 

@@ -105,19 +105,6 @@ def getOrder(request):
 
 @csrf_exempt
 @require_POST
-def addImageToProduct(request):
-    from urbanbackend.models import Product
-    request_data = request.POST
-    product_id = request_data.get('product_id')
-    image = request.FILES['image']
-    product = Product.objects.get(id=product_id)
-    product.image = image
-    product.save()
-    return JsonResponse({'message': 'Image added to product'}, status=200)
-
-
-@csrf_exempt
-@require_POST
 def createOrder(request):
     request_data = request.POST
     token = request_data.get('token')

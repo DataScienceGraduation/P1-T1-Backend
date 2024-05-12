@@ -1,6 +1,6 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
-from .custom_storage import AzureBlobStorage
+from urbanbackend.custom_storage import AzureBlobStorage
 
 
 class CustomerUser(AbstractUser):

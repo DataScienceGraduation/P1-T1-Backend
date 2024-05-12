@@ -11,10 +11,13 @@ azStorage = AzureBlobStorage()
 
 
 @csrf_exempt
-@require_GET
+@require_POST
 def getFeaturedProducts(request):
-    feature_product_list = Product.objects.filter(is_featured=True)
-    return JsonResponse({'products': list(feature_product_list.values())}, status=200)
+    limit = request.POST.get('limit')
+    feature_product_list = list(Product.objects.filter(is_featured=True).values())
+    if limit is not None:
+        feature_product_list = feature_product_list[:min(int(limit), len(feature_product_list))]
+    return JsonResponse({'products': feature_product_list}, status=200)
 
 
 @csrf_exempt
@@ -32,12 +35,21 @@ def getProducts(request):
 
 
 @csrf_exempt
-@require_GET
+@require_POST
 def getProduct(request):
-    request_data = request.POST
-    name = request_data.get('name')
-    product = Product.objects.get(name=name)
-    return JsonResponse({'product': product}, status=200)
+    try:
+        request_data = request.POST
+        id = request_data.get('id')
+        if id is None:
+            return JsonResponse({'message': 'product id is required'}, status=400)
+        if not Product.objects.filter(id=id).exists():
+            return JsonResponse({'message': 'product not found'}, status=404)
+        product = list(Product.objects.filter(id=id).values())[0]
+        return JsonResponse({'product': product}, status=200)
+    except Product.DoesNotExist:
+        return JsonResponse({'message': 'product not found'}, status=404)
+    except Exception as e:
+        return JsonResponse({'message': 'an unknown error occurred'}, status=500)
 
 
 @csrf_exempt

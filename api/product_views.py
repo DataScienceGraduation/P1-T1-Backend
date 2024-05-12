@@ -1,11 +1,8 @@
 from django.http import JsonResponse
 from django.views.decorators.http import require_POST, require_GET
 from django.views.decorators.csrf import csrf_exempt
-from django.contrib.auth import authenticate, login, logout
 
-from urbanbackend.custom_storage import AzureBlobStorage
-from urbanbackend.models import CustomerUser
-from rest_framework.authtoken.models import Token
+from storage.custom_storage import AzureBlobStorage
 from fuzzywuzzy import process
 from urbanbackend.models import Product, Category
 
@@ -28,11 +25,9 @@ def getProducts(request):
     if category is None:
         product_list = Product.objects.all()
         products = list(product_list.values())
-        for product in products:
-            product['image'] = azStorage.url(product['image'])
         return JsonResponse({'products': products}, status=200)
 
-    filtered_products = Product.objects.filter(category=category.name)
+    filtered_products = Product.objects.filter(category=category)
     return JsonResponse({'products': list(filtered_products.values())}, status=200)
 
 
@@ -42,9 +37,7 @@ def getProduct(request):
     request_data = request.POST
     name = request_data.get('name')
     product = Product.objects.get(name=name)
-    product['image'] = azStorage.url(product['image'])
-    product_detail = {'product': product}
-    return JsonResponse(product_detail, status=200)
+    return JsonResponse({'product': product}, status=200)
 
 
 @csrf_exempt
@@ -77,5 +70,7 @@ def addImageToProduct(request):
     image = request.FILES['image']
     product = Product.objects.get(id=product_id)
     product.image = image
+    product.save()
+    product.image = azStorage.url(product.image)
     product.save()
     return JsonResponse({'message': 'Image added to product'}, status=200)

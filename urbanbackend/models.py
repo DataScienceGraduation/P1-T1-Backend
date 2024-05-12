@@ -1,7 +1,6 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
-from urbanbackend.custom_storage import AzureBlobStorage
-
+from storage.custom_storage import AzureBlobStorage
 
 class CustomerUser(AbstractUser):
     address = models.CharField(max_length=255)

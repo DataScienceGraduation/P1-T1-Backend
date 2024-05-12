@@ -154,3 +154,5 @@ REST_FRAMEWORK = {
 }
 
 AUTH_USER_MODEL = 'urbanbackend.CustomerUser'
+
+MEDIA_ROOT = os.path.join(BASE_DIR, 'products')

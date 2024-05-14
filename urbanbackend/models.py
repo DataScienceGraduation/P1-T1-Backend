@@ -2,6 +2,7 @@ from django.contrib.auth.models import AbstractUser
 from django.db import models
 from storage.custom_storage import AzureBlobStorage
 
+
 class CustomerUser(AbstractUser):
     address = models.CharField(max_length=255)
     apartmentNo = models.CharField(max_length=255)

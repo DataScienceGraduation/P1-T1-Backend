@@ -2,11 +2,10 @@ from django.contrib.auth.password_validation import validate_password
 from django.http import JsonResponse
 from django.views.decorators.http import require_POST
 from django.views.decorators.csrf import csrf_exempt
-from django.contrib.auth import authenticate
+from django.contrib.auth import authenticate, login
 from urbanbackend.models import CustomerUser
 from rest_framework.authtoken.models import Token
-import messages
-
+from . import messages
 
 @csrf_exempt
 @require_POST

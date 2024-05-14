@@ -6,8 +6,7 @@ from storage.custom_storage import AzureBlobStorage
 from fuzzywuzzy import process
 from urbanbackend.models import Product, Category
 
-import messages
-
+from . import messages
 
 azStorage = AzureBlobStorage()
 

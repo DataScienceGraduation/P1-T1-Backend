@@ -4,7 +4,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth import authenticate, login, logout
 from urbanbackend.models import CustomerUser, Order, Cart, OrderItem, Product
 from rest_framework.authtoken.models import Token
-import messages
+from . import messages
 
 
 @csrf_exempt

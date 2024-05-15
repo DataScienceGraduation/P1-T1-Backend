@@ -36,9 +36,11 @@ def getProducts(request):
             return JsonResponse({'products': products}, status=200)
         if not Category.objects.filter(name=category).exists():
             return JsonResponse({'message': messages.CATEGORY_NOT_FOUND}, status=404)
-        filtered_products = Product.objects.filter(category=category)
+        id = Category.objects.get(name=category).id
+        filtered_products = Product.objects.filter(category=id)
         return JsonResponse({'products': list(filtered_products.values())}, status=200)
-    except:
+    except Exception as e:
+        print(e)
         return JsonResponse({'message':  messages.UNKNOWN_ERROR}, status=500)
 
 

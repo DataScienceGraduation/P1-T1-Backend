@@ -32,7 +32,7 @@ def getOrders(request):
 
 
 @csrf_exempt
-@require_GET
+@require_POST
 def getCart(request):
     try:
         request_data = request.POST
@@ -41,6 +41,8 @@ def getCart(request):
             return JsonResponse({'message': messages.INVALID_REQUEST}, status=400)
         token = Token.objects.get(key=token).user
         if not token:
+            return JsonResponse({'message': messages.INVALID_REQUEST}, status=400)
+        if not Cart.objects.filter(user=token).exists():
             return JsonResponse({'message': messages.INVALID_REQUEST}, status=400)
         cart = Cart.objects.get(user=token)
         cart_items = []
@@ -87,10 +89,8 @@ def addToCart(request):
             return JsonResponse({'message': messages.INVALID_REQUEST}, status=400)
         orderItem = OrderItem.objects.create(product=product, quantity=quantity, total=int(quantity) * product.price)
         if not Cart.objects.filter(user=token).exists():
-            return JsonResponse({'message': messages.INVALID_REQUEST}, status=400)
-        cart = Cart.objects.get(user=token)
-        if not cart:
             cart = Cart.objects.create(user=token)
+        cart = Cart.objects.get(user=token)
         cart.items.add(orderItem)
         return JsonResponse({'message': messages.ITEM_ADDED_TO_CART}, status=200)
     except:

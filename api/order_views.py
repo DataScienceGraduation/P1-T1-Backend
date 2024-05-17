@@ -5,7 +5,9 @@ from django.contrib.auth import authenticate, login, logout
 from urbanbackend.models import CustomerUser, Order, Cart, OrderItem, Product
 from rest_framework.authtoken.models import Token
 from . import messages
+from storage.custom_storage import AzureBlobStorage
 
+azStorage = AzureBlobStorage()
 
 @csrf_exempt
 @require_POST
@@ -46,10 +48,21 @@ def getCart(request):
             return JsonResponse({'message': messages.INVALID_REQUEST}, status=400)
         cart = Cart.objects.get(user=token)
         cart_items = []
+        total_price = 0
         for item in cart.items.all():
-            cart_items.append({'product_id': item.product.id, 'quantity': item.quantity})
+            product = Product.objects.get(id=item.product.id)
+            dict = {'product': {
+                    'product_id': product.id,
+                    'name': product.name,
+                    'price': product.price,
+                    'image': str(product.image),
+            }, 'quantity': item.quantity, 'total': item.total}
+            total_price += item.total
+            cart_items.append(dict)
+        cart.total = total_price
         return JsonResponse({'cart': {'cartid': cart.id, 'cartitems': cart_items}, 'total': cart.total}, status=200)
-    except:
+    except Exception as e:
+        print(e)
         return JsonResponse({'message': messages.UNKNOWN_ERROR}, status=500)
 
 
@@ -87,13 +100,24 @@ def addToCart(request):
         product = Product.objects.get(id=product_id)
         if not token or not product:
             return JsonResponse({'message': messages.INVALID_REQUEST}, status=400)
-        orderItem = OrderItem.objects.create(product=product, quantity=quantity, total=int(quantity) * product.price)
+        productTotal = product.price * int(quantity)
+        orderItem = OrderItem.objects.create(product=product, quantity=quantity, total=productTotal)
         if not Cart.objects.filter(user=token).exists():
-            cart = Cart.objects.create(user=token)
+            cart = Cart.objects.create(user=token, total = 0)
+            cart.save()
         cart = Cart.objects.get(user=token)
+        for item in cart.items.all():
+            if item.product == product:
+                item.quantity += int(quantity)
+                item.total += productTotal
+                item.save()
+                cart.total += productTotal
+                return JsonResponse({'message': messages.ITEM_ADDED_TO_CART}, status=200)
         cart.items.add(orderItem)
+        cart.total += productTotal
         return JsonResponse({'message': messages.ITEM_ADDED_TO_CART}, status=200)
-    except:
+    except Exception as e:
+        print(e)
         return JsonResponse({'message': messages.UNKNOWN_ERROR}, status=500)
 
 
